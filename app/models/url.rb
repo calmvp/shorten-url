@@ -1,5 +1,12 @@
-class Url < ActiveRecord::Base
-  before_save :generate_shortened_url
+require 'uri'
+
+class Url < ActiveRecord::Base 
+  
+  validates :long_name, presence: true
+  validates_format_of :long_name, :with => URI::regexp(%w(http https))
+  
+
+  before_create :generate_shortened_url
   # Remember to create a migration!
   
   def generate_shortened_url
@@ -11,8 +18,12 @@ class Url < ActiveRecord::Base
     end
   end
 
-  def self.new_url
-    Url.new(params[:long_name])
+  def self.new_url(params)
+    Url.new(long_name: params[:user_input])
+  end
+
+  def self.find_url(short_url)
+    Url.find_by_short_name(short_url)
   end
 
 end
